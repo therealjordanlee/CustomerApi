@@ -20,7 +20,6 @@ namespace CustomerApi
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            //TODO: Add Swagger
             //TODO: Add logging
             //TODO: Add logging middleware - https://docs.microsoft.com/en-us/aspnet/core/fundamentals/middleware/write?view=aspnetcore-3.1
             //TODO: Add correlation id for tracking requests https://github.com/ekmsystems/serilog-enrichers-correlation-id/blob/master/README.md
