@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CustomerApi.Entities;
+using CustomerApi.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -22,6 +23,7 @@ namespace CustomerApi
             //TODO: Add correlation id for tracking requests https://github.com/ekmsystems/serilog-enrichers-correlation-id/blob/master/README.md
             //TODO: Add exception handling middleware? Probably overkill for such a simple API
             services.AddDbContext<CustomerContext>(opt => opt.UseInMemoryDatabase("CustomerDb"));
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddControllers();
         }
 
