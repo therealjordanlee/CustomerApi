@@ -13,20 +13,23 @@ namespace CustomerApi.Controllers
     [Route("customers")]
     public class CustomersController : ControllerBase
     {
-        // TODO: move customercontext to repository class
-        //private readonly CustomerContext _customerContext;
         private readonly ICustomerRepository _customerRepository;
         public CustomersController(ICustomerRepository customerRepository)
         {
             _customerRepository = customerRepository;
         }
 
+        /// <summary>
+        /// Find a customer by firstname and lastname. Returns all customers if no query is passed.
+        /// </summary>
+        /// <param name="firstNameIncludes">Search for customer with first name including this string</param>
+        /// <param name="lastNameIncludes">Search for customer with last name including this string</param>
+        /// <returns></returns>
         [HttpGet("")]
         public async Task<IActionResult> Get([FromQuery]string? firstNameIncludes, [FromQuery]string? lastNameIncludes)
         {
             if (string.IsNullOrEmpty(firstNameIncludes) && string.IsNullOrEmpty(lastNameIncludes)) // return all customers if query parameters are not specified
             {
-                //var customers = await _customerContext.Customers.ToListAsync();
                 var customers = await _customerRepository.GetAllCustomersAsync();
                 return Ok(customers);
             }
@@ -35,12 +38,13 @@ namespace CustomerApi.Controllers
                 var customers = await _customerRepository.GetCustomersByNameAsync(firstNameIncludes, lastNameIncludes);
                 return Ok(customers);
             }
-            //var entities = await _customerContext.Customers
-            //    .Where(x => (!string.IsNullOrEmpty(firstNameIncludes) ? x.FirstName.Contains(firstNameIncludes,StringComparison.OrdinalIgnoreCase) : true))
-            //    .Where(x => (!string.IsNullOrEmpty(lastNameIncludes) ? x.LastName.Contains(lastNameIncludes, StringComparison.OrdinalIgnoreCase) : true))
-            //    .ToListAsync();
         }
 
+        /// <summary>
+        /// Create a new customer based on customer details defined in request body.
+        /// </summary>
+        /// <param name="customer">Customer details</param>
+        /// <returns></returns>
         [HttpPost("")]
         public async Task<IActionResult> CreateCustomer([FromBody]CustomerModel customer)
         {
@@ -50,26 +54,15 @@ namespace CustomerApi.Controllers
             }
 
             await _customerRepository.AddCustomerAsync(customer);
-
-            //try
-            //{
-            //    _customerContext.Add(new CustomerEntity
-            //    {
-            //        FirstName = customer.FirstName,
-            //        LastName = customer.LastName,
-            //        DateOfBirth = customer.DateOfBirth
-            //    });
-            //    await _customerContext.SaveChangesAsync();
-            //}
-            //catch(Exception ex)
-            //{
-            //    // todo: error handling
-            //    Console.WriteLine(ex.Message);
-            //}
             return Ok();
         }
 
-
+        /// <summary>
+        /// Update an existing customer based on customer details defined in request body
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="customer">Customer details</param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCustomer([FromRoute] int id,
             [FromBody]CustomerModel customer)
@@ -80,30 +73,18 @@ namespace CustomerApi.Controllers
             }
 
             await _customerRepository.UpdateCustomerAsync(id, customer);
-
-            //var entity = await _customerContext.Customers.FirstOrDefaultAsync(c => c.Id == id);
-            //if(entity != null)
-            //{
-            //    entity.FirstName = customer.FirstName;
-            //    entity.LastName = customer.LastName;
-            //    entity.DateOfBirth = customer.DateOfBirth;
-            //    await _customerContext.SaveChangesAsync();
-            //}
-            //TODO - handle customer not found
             return Ok();
         }
 
+        /// <summary>
+        /// Delete an existing customer based on id
+        /// </summary>
+        /// <param name="id">Id of the customer to delete</param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer([FromRoute]int id)
         {
             await _customerRepository.DeleteCustomerAsync(id);
-            //var entity = await _customerContext.Customers.FirstOrDefaultAsync(c => c.Id == id);
-            //if(entity != null)
-            //{
-            //    _customerContext.Customers.Remove(entity);
-            //    await _customerContext.SaveChangesAsync();
-            //}
-            //TODO - handle customer not found
             return Ok();
         }
     }
