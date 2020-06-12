@@ -20,17 +20,18 @@ namespace CustomerApi.Controllers
         }
 
         [HttpGet("")]
-        public async Task<IActionResult> Get([FromQuery]string? name)
+        public async Task<IActionResult> Get([FromQuery]string? firstNameIncludes, [FromQuery]string? lastNameIncludes)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(firstNameIncludes) && string.IsNullOrEmpty(lastNameIncludes)) // return all customers if query parameters are not specified
             {
                 var customers = await _customerContext.Customers.ToListAsync();
                 return Ok(customers);
             }
-            var entities = await _customerContext.Customers.Where(
-            c => c.FirstName.Contains(name, StringComparison.OrdinalIgnoreCase)
-            || c.LastName.Contains(name, StringComparison.OrdinalIgnoreCase))
-            .ToListAsync();
+
+            var entities = await _customerContext.Customers
+                .Where(x => (!string.IsNullOrEmpty(firstNameIncludes) ? x.FirstName.Contains(firstNameIncludes,StringComparison.OrdinalIgnoreCase) : true))
+                .Where(x => (!string.IsNullOrEmpty(lastNameIncludes) ? x.LastName.Contains(lastNameIncludes, StringComparison.OrdinalIgnoreCase) : true))
+                .ToListAsync();
 
             return Ok(entities);
         }
@@ -38,8 +39,6 @@ namespace CustomerApi.Controllers
         [HttpPost("")]
         public async Task<IActionResult> CreateCustomer([FromBody]CustomerModel customer)
         {
-            var d = new DateTime(2000, 01, 01);
-
             if (!ModelState.IsValid)
             {
                 return BadRequest();
