@@ -1,4 +1,4 @@
-# Customer API
+# Customer API [![Build Status](https://dev.azure.com/jordanleenet/Public/_apis/build/status/therealjordanlee.CustomerApi?branchName=master)](https://dev.azure.com/jordanleenet/Public/_build/latest?definitionId=3&branchName=master)
 
 ## Problem to Solve
 Build a simple Backend Application that allows:
