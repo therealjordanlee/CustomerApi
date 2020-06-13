@@ -22,6 +22,9 @@ Build a simple Backend Application that allows:
 - Build the project: `dotnet build ./src/`
 - Run the project: `dotnet run --project ./src/CustomerApi.csproj`
 
+### Swagger
+While the application is running, you can browse the SwaggerUI on http://localhost:5001/swagger
+
 ### Adding customers
 ```
 curl -X POST "https://localhost:5001/customers" -H "accept: */*" -H "Content-Type: application/json" -d "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"dateOfBirth\":\"2020-06-13T11:09:53.646Z\"}"
