@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using CustomerApi.Entities;
+using CustomerApi.Middleware;
 using CustomerApi.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -43,6 +44,7 @@ namespace CustomerApi
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseMiddleware(typeof(ExceptionHandlerMiddleware));
             app.UseRouting();
             app.UseSwagger();
             app.UseSwaggerUI(c =>
