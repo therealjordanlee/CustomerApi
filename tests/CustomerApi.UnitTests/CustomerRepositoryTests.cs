@@ -2,29 +2,30 @@ using CustomerApi.Entities;
 using CustomerApi.Exceptions;
 using CustomerApi.Models;
 using CustomerApi.Repositories;
+using CustomerApi.TestHelpers;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace CustomerApiTests
+namespace CustomerApi.UnitTests
 {
     public class CustomerRepositoryTests
     {
         public CustomerRepositoryTests()
         {
         }
+
         [Fact]
         public async Task GetAllCustomersAsync_Returns_AllCustomersFromDb()
         {
             // Arrange
-            using (var context = await GetInMemoryCustomerDbContext("GetTest1Db"))
+            using (var context = await RepositoryTestHelper.GetInMemoryCustomerDbContext("GetTest1Db"))
             {
                 var customerRepository = new CustomerRepository(context);
-                var expectedResult = GetMockCustomerData().ToList();
+                var expectedResult = RepositoryTestHelper.GetMockCustomerData().ToList();
 
                 //Act
                 var result = await customerRepository.GetAllCustomersAsync();
@@ -38,7 +39,7 @@ namespace CustomerApiTests
         public async Task GetCustomersByNameAsync_WithFirstNameAndLastName_ReturnsRecordsContainingFirstNameAndLastNameParameters()
         {
             // Arrange
-            using (var context = await GetInMemoryCustomerDbContext("GetTest2Db"))
+            using (var context = await RepositoryTestHelper.GetInMemoryCustomerDbContext("GetTest2Db"))
             {
                 var customerRepository = new CustomerRepository(context);
                 var expectedResult = new List<CustomerEntity>
@@ -47,7 +48,7 @@ namespace CustomerApiTests
                 };
 
                 //Act
-                var result = await customerRepository.GetCustomersByNameAsync(firstName: "jor", lastName:"le");
+                var result = await customerRepository.GetCustomersByNameAsync(firstName: "jor", lastName: "le");
 
                 result.Should().BeEquivalentTo(expectedResult);
             }
@@ -57,7 +58,7 @@ namespace CustomerApiTests
         public async Task AddCustomerAsync_WithValidCustomerModel_AddsNewRecordIntoDb()
         {
             // Arrange
-            using (var context = await GetInMemoryCustomerDbContext("AddTest1Db"))
+            using (var context = await RepositoryTestHelper.GetInMemoryCustomerDbContext("AddTest1Db"))
             {
                 var customerRepository = new CustomerRepository(context);
                 var newCustomer = new CustomerModel
@@ -67,15 +68,15 @@ namespace CustomerApiTests
                     DateOfBirth = new DateTime(1912, 6, 23)
                 };
 
-                var expectedResult = GetMockCustomerData()
+                var expectedResult = RepositoryTestHelper.GetMockCustomerData()
                     .ToList();
                 expectedResult.Add(new CustomerEntity
-                    {
-                        Id = 5,
-                        FirstName = newCustomer.FirstName,
-                        LastName = newCustomer.LastName,
-                        DateOfBirth = newCustomer.DateOfBirth
-                    }
+                {
+                    Id = 5,
+                    FirstName = newCustomer.FirstName,
+                    LastName = newCustomer.LastName,
+                    DateOfBirth = newCustomer.DateOfBirth
+                }
                     );
 
                 // Act
@@ -91,7 +92,7 @@ namespace CustomerApiTests
         public async Task UpdateCustomerAsync_WithExistingId_UpdatesRecordInDb()
         {
             // Arrange
-            using (var context = await GetInMemoryCustomerDbContext("UpdateTest1Db"))
+            using (var context = await RepositoryTestHelper.GetInMemoryCustomerDbContext("UpdateTest1Db"))
             {
                 var customerRepository = new CustomerRepository(context);
                 var updatedCustomer = new CustomerModel
@@ -108,7 +109,7 @@ namespace CustomerApiTests
                     LastName = updatedCustomer.LastName,
                     DateOfBirth = updatedCustomer.DateOfBirth
                 };
-                    
+
                 // Act
                 await customerRepository.UpdateCustomerAsync(1, updatedCustomer);
                 var result = await customerRepository.GetCustomersByNameAsync(firstName: updatedCustomer.FirstName, lastName: updatedCustomer.LastName);
@@ -122,7 +123,7 @@ namespace CustomerApiTests
         public async Task UpdateCustomerAsync_WithInvalidId_ThrowsCustomerNotFoundException()
         {
             // Arrange
-            using (var context = await GetInMemoryCustomerDbContext("UpdateTest2Db"))
+            using (var context = await RepositoryTestHelper.GetInMemoryCustomerDbContext("UpdateTest2Db"))
             {
                 var customerRepository = new CustomerRepository(context);
                 var updatedCustomer = new CustomerModel
@@ -140,7 +141,6 @@ namespace CustomerApiTests
 
                 // Assert
                 act.Should().Throw<CustomerNotFoundException>();
-                
             }
         }
 
@@ -148,10 +148,10 @@ namespace CustomerApiTests
         public async Task DeleteCustomerAsync_WithValidId_RemovesRecordFromDatabase()
         {
             // Arrange
-            using (var context = await GetInMemoryCustomerDbContext("DeleteTest1Db"))
+            using (var context = await RepositoryTestHelper.GetInMemoryCustomerDbContext("DeleteTest1Db"))
             {
                 var customerRepository = new CustomerRepository(context);
-                var expectedResult = GetMockCustomerData().ToList();
+                var expectedResult = RepositoryTestHelper.GetMockCustomerData().ToList();
                 expectedResult.RemoveAt(0);
 
                 // Act
@@ -170,10 +170,10 @@ namespace CustomerApiTests
         public async Task DeleteCustomerAsync_WithInvalidId_ThrowsCustomerNotFoundException()
         {
             // Arrange
-            using (var context = await GetInMemoryCustomerDbContext("DeleteTest2Db"))
+            using (var context = await RepositoryTestHelper.GetInMemoryCustomerDbContext("DeleteTest2Db"))
             {
                 var customerRepository = new CustomerRepository(context);
-                var expectedResult = GetMockCustomerData().ToList();
+                var expectedResult = RepositoryTestHelper.GetMockCustomerData().ToList();
                 expectedResult.RemoveAt(0);
 
                 // Act
@@ -185,28 +185,27 @@ namespace CustomerApiTests
             }
         }
 
+        //private async Task<CustomerContext> GetInMemoryCustomerDbContext(string dbName)
+        //{
+        //    var dbContextOptions = new DbContextOptionsBuilder<CustomerContext>()
+        //    .UseInMemoryDatabase(databaseName: dbName)
+        //    .Options;
 
-        private async Task<CustomerContext> GetInMemoryCustomerDbContext(string dbName)
-        {
-            var dbContextOptions = new DbContextOptionsBuilder<CustomerContext>()
-            .UseInMemoryDatabase(databaseName: dbName)
-            .Options;
+        //    var customerContext = new CustomerContext(dbContextOptions);
+        //    customerContext.AddRange(GetMockCustomerData());
+        //    await customerContext.SaveChangesAsync();
+        //    return customerContext;
+        //}
 
-            var customerContext = new CustomerContext(dbContextOptions);
-            customerContext.AddRange(GetMockCustomerData());
-            await customerContext.SaveChangesAsync();
-            return customerContext;
-        }
-
-        private CustomerEntity[] GetMockCustomerData()
-        {
-            return new CustomerEntity[]
-            {
-                new CustomerEntity{Id=1, FirstName="Jordan", LastName="Lee", DateOfBirth=new DateTime(2005,1,1) },
-                new CustomerEntity{Id=2, FirstName="Jordan", LastName="Li", DateOfBirth=new DateTime(1980,1,1) },
-                new CustomerEntity{Id=3, FirstName="Andrew", LastName="Hoffman", DateOfBirth=new DateTime(1970,1,1) },
-                new CustomerEntity{Id=4, FirstName="Michael", LastName="Hoffman", DateOfBirth=new DateTime(1960,1,1) }
-            };
-        }
+        //private CustomerEntity[] GetMockCustomerData()
+        //{
+        //    return new CustomerEntity[]
+        //    {
+        //        new CustomerEntity{Id=1, FirstName="Jordan", LastName="Lee", DateOfBirth=new DateTime(2005,1,1) },
+        //        new CustomerEntity{Id=2, FirstName="Jordan", LastName="Li", DateOfBirth=new DateTime(1980,1,1) },
+        //        new CustomerEntity{Id=3, FirstName="Andrew", LastName="Hoffman", DateOfBirth=new DateTime(1970,1,1) },
+        //        new CustomerEntity{Id=4, FirstName="Michael", LastName="Hoffman", DateOfBirth=new DateTime(1960,1,1) }
+        //    };
+        //}
     }
 }
