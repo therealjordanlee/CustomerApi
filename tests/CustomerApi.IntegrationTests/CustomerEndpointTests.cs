@@ -108,11 +108,9 @@ namespace CustomerApi.IntegrationTests
 
         private async Task SeedData()
         {
-            // Seed Data
             var testCustomerData = RepositoryTestHelper.GetMockCustomerData();
             using (var client = _webApplicationFactory.CreateClient())
             {
-                //var client = webAppFactory.CreateClient();
                 foreach (var testCustomer in testCustomerData)
                 {
                     var validNewCustomer = new CustomerModel
