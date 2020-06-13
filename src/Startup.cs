@@ -24,7 +24,6 @@ namespace CustomerApi
             //TODO: Add logging
             //TODO: Add logging middleware - https://docs.microsoft.com/en-us/aspnet/core/fundamentals/middleware/write?view=aspnetcore-3.1
             //TODO: Add correlation id for tracking requests https://github.com/ekmsystems/serilog-enrichers-correlation-id/blob/master/README.md
-            //TODO: Add exception handling middleware? Probably overkill for such a simple API
             services.AddDbContext<CustomerContext>(opt => opt.UseInMemoryDatabase("CustomerDb"));
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddSwaggerGen(c =>
