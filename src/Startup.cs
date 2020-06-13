@@ -1,19 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using CustomerApi.Entities;
 using CustomerApi.Middleware;
 using CustomerApi.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace CustomerApi
 {
@@ -21,9 +18,6 @@ namespace CustomerApi
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            //TODO: Add logging
-            //TODO: Add logging middleware - https://docs.microsoft.com/en-us/aspnet/core/fundamentals/middleware/write?view=aspnetcore-3.1
-            //TODO: Add correlation id for tracking requests https://github.com/ekmsystems/serilog-enrichers-correlation-id/blob/master/README.md
             services.AddDbContext<CustomerContext>(opt => opt.UseInMemoryDatabase("CustomerDb"));
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddSwaggerGen(c =>
@@ -43,6 +37,7 @@ namespace CustomerApi
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseSerilogRequestLogging();
             app.UseMiddleware(typeof(ExceptionHandlerMiddleware));
             app.UseRouting();
             app.UseSwagger();
