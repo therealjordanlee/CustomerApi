@@ -1,0 +1,44 @@
+# Run pipeline whenever a commit or tag is pushed
+trigger:
+  branches:
+    include:
+    - '*'
+  tags:
+    include: 
+    - '*'
+  
+# Run pipeline whenever a PR is raised
+pr:
+  branches:
+    include:
+    - '*'
+
+variables:
+  BuildConfiguration: release
+
+steps:
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'restore'
+      projects: '**/*.csproj'
+      feedsToUse: 'select'
+
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'build'
+      arguments: '--configuration $(buildConfiguration)'
+      projects: '**/*.csproj'
+  
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'test'
+      arguments: '/p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/'
+      publishTestResults: true
+      projects: 'tests/**/*.csproj'
+  
+  - task: PublishCodeCoverageResults@1
+    displayName: 'Publish code coverage report'
+    inputs:
+      codeCoverageTool: 'Cobertura'
+      summaryFileLocation: '$(Build.SourcesDirectory)/**/coverage.cobertura.xml'
+  
